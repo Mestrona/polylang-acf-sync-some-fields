@@ -33,7 +33,37 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
         {
             add_filter('pll_copy_post_metas', array(&$this, 'filter_keys'), 20, 3);
             add_action('acf/create_field_options', array(&$this, 'action_acf_create_field_options'), 10, 1);
+            add_action('init', array(&$this, 'register_strings'));
 
+        }
+
+        /**
+         * Register Field Strings so they can be translated
+         *
+         * @param $field
+         * @param $post_id
+         */
+        public function register_strings()
+        {
+            if (!PLL_ADMIN) {
+                return;
+            }
+            $return = array();
+            $return = apply_filters('acf/get_field_groups', $return);
+            foreach($return as $group) {
+                $lang = pll_get_post_language($group['id']);
+                if ($lang != 'en') {
+                    continue;
+                }
+
+                $fields = array();
+                $fields = apply_filters('acf/field_group/get_fields', $fields, $group['id']);
+
+                foreach($fields as $field) {
+                    pll_register_string($field['key'] . '_label', $field['label']);
+                    // Fixme: choices
+                }
+            }
         }
 
         /**
