@@ -33,9 +33,20 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
         {
             add_filter('pll_copy_post_metas', array(&$this, 'filter_keys'), 20, 3);
             add_action('acf/create_field_options', array(&$this, 'action_acf_create_field_options'), 10, 1);
+            add_action('acf/create_field', array(&$this, 'action_acf_create_field'), 10, 1);
             add_action('init', array(&$this, 'register_strings'));
         }
 
+        public function action_acf_create_field($field)
+        {
+            if (get_post_type() != 'post') {
+                return; // FIXME
+            }
+            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 1;
+            if ($sync) {
+                echo '<small>Synced between languages</small>';
+            }
+        }
         /**
          * Register Field Strings so they can be translated
          *
@@ -54,13 +65,19 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
                 if ($lang != 'en') {
                     continue;
                 }
+                pll_register_string('group_' . $group['id'] . '_title', $group['title']);
 
                 $fields = array();
                 $fields = apply_filters('acf/field_group/get_fields', $fields, $group['id']);
 
                 foreach($fields as $field) {
                     pll_register_string($field['key'] . '_label', $field['label']);
-                    // Fixme: choices
+                    if (!isset($field['choices'])) {
+                        continue;
+                    }
+                    foreach($field['choices'] as $key=>$choiceValue) {
+                        pll_register_string($field['key'] . '_label_choice_' . $key, $choiceValue);
+                    }
                 }
             }
         }
