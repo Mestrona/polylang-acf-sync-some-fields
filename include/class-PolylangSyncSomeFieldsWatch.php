@@ -34,7 +34,6 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
             add_filter('pll_copy_post_metas', array(&$this, 'filter_keys'), 20, 3);
             add_action('acf/create_field_options', array(&$this, 'action_acf_create_field_options'), 10, 1);
             add_action('init', array(&$this, 'register_strings'));
-
         }
 
         /**

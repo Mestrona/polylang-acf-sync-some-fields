@@ -36,7 +36,20 @@ class PolylangSyncSomeFields {
 	private function __construct() {
 		add_action( 'plugins_loaded' , array( &$this , 'plugins_loaded') );
 		// add_option( 'polylang_clone_attachments' , true );
-	}
+        add_action('pre_get_posts', array(&$this, 'fetch_english_language'), 2);
+    }
+
+    /**
+     * Always fetch english field groups. We consider them global.
+     *
+     * @param $query
+     */
+    public function fetch_english_language(WP_Query $query ) {
+        if ($query->get('post_type') == 'acf') {
+            $query->set('lang', 'en');
+            $query->set('tax_query', false);
+        }
+    }
 
 	/**
 	 *	Setup plugin
