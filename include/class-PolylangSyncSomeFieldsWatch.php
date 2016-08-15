@@ -87,7 +87,7 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
          *
          * @action 'pll_copy_post_metas'
          */
-        public function filter_keys($keys, $sync, $from, $to, $lang)
+        public function filter_keys($keys)
         {
             foreach($keys as $index=>$key) {
                 $field = get_field_object($key);
