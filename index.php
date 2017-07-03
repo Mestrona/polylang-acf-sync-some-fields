@@ -6,7 +6,7 @@ Plugin URI: https://github.com/mestrona/polylang-acf-sync-some-fields
 Description: For your custom fields, choose whether or not to "Sync Between Languages"
 Author: Alexander Menk
 Author URI: https://github.com/amenk
-Version: 1.0.0
+Version: 2.0.0
 License: GPLv3
 */
 

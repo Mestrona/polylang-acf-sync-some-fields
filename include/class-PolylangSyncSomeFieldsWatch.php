@@ -94,8 +94,10 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
                 if (!$field) { // no ACF field
                     continue;
                 }
-                $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 1;
-                if (!$sync) {
+                // safeguard: on bulk editing, lang_sync is not set - so assume 0 to not mess up things
+                // see https://github.com/Mestrona/polylang-acf-sync-some-fields/issues/1
+	            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 0;
+	            if (!$sync) {
                     unset($keys[$index]);
                 }
             }
