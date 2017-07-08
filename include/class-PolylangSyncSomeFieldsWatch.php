@@ -42,7 +42,7 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
             if (get_post_type() != 'post') {
                 return; // FIXME
             }
-            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 1;
+            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 0;
             if ($sync) {
                 echo '<small>Synced between languages</small>';
             }
