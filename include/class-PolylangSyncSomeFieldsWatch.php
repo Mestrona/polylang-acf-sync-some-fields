@@ -1,11 +1,10 @@
 <?php
 
-
 if (!class_exists('PolylangSyncSomeFieldsWatch')) :
     class PolylangSyncSomeFieldsWatch
     {
         /**
-         *    Holding the singleton instance
+         * Holding the singleton instance
          */
         private static $_instance = null;
 
@@ -21,56 +20,68 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
         }
 
         /**
-         *    Prevent from creating more instances
+         * Prevent from creating more instances
          */
         private function __clone()
         {
         }
 
-        /**
-         */
+
         private function __construct()
         {
             add_filter('pll_copy_post_metas', array(&$this, 'filter_keys'), 20, 3);
-            add_action('acf/create_field_options', array(&$this, 'action_acf_create_field_options'), 10, 1);
-            add_action('acf/create_field', array(&$this, 'action_acf_create_field'), 10, 1);
+            add_action('acf/render_field_settings', array(&$this, 'action_acf_create_field_options'), 10, 1);
+            add_action('acf/render_field', array(&$this, 'action_acf_create_field'), 10, 1);
             add_action('init', array(&$this, 'register_strings'));
+
+            add_action('admin_enqueue_scripts', 'load_assets');
+            function load_assets() {
+                wp_register_style('pll_acf_sync_some_fields', plugins_url('/../css/admin.css',__FILE__ ));
+                wp_enqueue_style('pll_acf_sync_some_fields');
+            }
+
         }
+
+        /**
+         * Display label if set to sync on editing screen
+         * @param $field
+         */
 
         public function action_acf_create_field($field)
         {
-            if (get_post_type() != 'post') {
-                return; // FIXME
+            if (get_post_type() === 'acf-field-group') {
+                return;
             }
-            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 0;
+
+            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 1;
             if ($sync) {
-                echo '<small>Synced between languages</small>';
+                echo '<div class="syncedLabel">Synced between all languages</div>';
             }
         }
         /**
          * Register Field Strings so they can be translated
-         *
          * @param $field
          * @param $post_id
          */
+
         public function register_strings()
         {
             if (!PLL_ADMIN) {
                 return;
             }
-            $return = array();
-            $return = apply_filters('acf/get_field_groups', $return);
+            $return = acf_get_field_groups();
+
             foreach($return as $group) {
-                $lang = pll_get_post_language($group['id']);
-                if ($lang != 'en') {
+
+                $lang = pll_get_post_language($group['ID']);
+                if ($lang != 'de') {
                     continue;
                 }
-                pll_register_string('group_' . $group['id'] . '_title', $group['title']);
+                pll_register_string('group_' . $group['ID'] . '_title', $group['title']);
 
-                $fields = array();
-                $fields = apply_filters('acf/field_group/get_fields', $fields, $group['id']);
-
+                $fields = acf_get_fields($group['ID']);
                 foreach($fields as $field) {
+
                     pll_register_string($field['key'] . '_label', $field['label']);
                     if (!isset($field['choices'])) {
                         continue;
@@ -89,11 +100,23 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
          */
         public function filter_keys($keys)
         {
-            foreach($keys as $index=>$key) {
+            /**
+             * Show overlay for saving post first, if new post is created
+             */
+
+            $url = $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+
+            if (strpos($url,'from_post') !== false && strpos($url,'new_lang') !== false) {
+                include(__DIR__ . '/../js/saveFirstOverlay.php');
+                return $keys;
+            }
+
+            foreach($keys as $index => $key) {
                 $field = get_field_object($key);
                 if (!$field) { // no ACF field
                     continue;
                 }
+
                 // safeguard: on bulk editing, lang_sync is not set - so assume 0 to not mess up things
                 // see https://github.com/Mestrona/polylang-acf-sync-some-fields/issues/1
 	            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 0;
@@ -101,6 +124,7 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
                     unset($keys[$index]);
                 }
             }
+
             return $keys;
         }
 
@@ -111,25 +135,16 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
          */
         public function action_acf_create_field_options($field)
         {
-            ?>
-            <tr class="foo" data-field_name="<?php echo $field['key']; ?>">
-                <td class="label"><label>Sync Field between Languages</label></td>
-                <td>
-                    <?php
-                    do_action('acf/create_field', array(
-                        'type' => 'radio',
-                        'name' => 'fields[' . $field['key'] . '][lang_sync]',
-                        'value' => isset($field['lang_sync']) ? $field['lang_sync'] : 1,
-                        'choices' => array(
-                            1 => __("Yes", 'acf'),
-                            0 => __("No", 'acf'),
-                        ),
-                        'layout' => 'horizontal',
-                    ));
-                    ?>
-                </td>
-            </tr>
-            <?php
+            //var_dump($field);
+            acf_render_field_setting( $field, array(
+                'label'         => __('Sync between all languages?'),
+                'instructions'  => '',
+                'type' => 'true_false',
+                'ui' => 1,
+                'name' => 'lang_sync',
+                'value' => isset($field['lang_sync']) ? $field['lang_sync'] : 0,
+            ), true);
+
         }
     }
 

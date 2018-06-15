@@ -2,3 +2,33 @@
 th.column-polylang_cloner_actions, td.column-polylang_cloner_actions {
 	width: 10em;
 }
+
+.syncedLabel {
+	margin: 0 0 10px;
+	color: #88CE5E;
+}
+
+.postbox-container {
+	position: relative;
+}
+
+.saveFirstOverlay {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: rgba(0,0,0,0.8);
+	z-index: 10;
+}
+
+.saveFirstOverlay__message {
+	position: absolute;
+	top: 60px;
+	left: 50%;
+	transform: translateX(-50%);
+	color: white;
+	font-size: 30px;
+	line-height: 45px;
+	text-align: center;
+}

@@ -6,7 +6,7 @@ Plugin URI: https://github.com/mestrona/polylang-acf-sync-some-fields
 Description: For your custom fields, choose whether or not to "Sync Between Languages"
 Author: Alexander Menk
 Author URI: https://github.com/amenk
-Version: 2.0.0
+Version: 2.1.0
 License: GPLv3
 */
 
@@ -59,7 +59,7 @@ class PolylangSyncSomeFields {
 	function plugins_loaded() {
 		// load_plugin_textdomain( 'polylang-fix-relationships' , false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		if ( is_admin() && class_exists( 'Polylang' ) && function_exists( 'PLL' ) ) {
-			PolylangSyncSomeFieldsWatch::instance();
+            PolylangSyncSomeFieldsWatch::instance();
 		}
 	}
 }
@@ -80,3 +80,4 @@ spl_autoload_register( 'polylang_sync_some_fields_autoload' );
 
 // init plugin
 PolylangSyncSomeFields::instance();
+
