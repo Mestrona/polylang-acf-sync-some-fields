@@ -55,7 +55,7 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
 
             $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 1;
             if ($sync) {
-                echo '<div class="syncedLabel">Synced between all languages</div>';
+                echo '<div class="langSyncIcon">&nbsp;</div>';
             }
         }
         /**
@@ -111,21 +111,102 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
                 return $keys;
             }
 
-            foreach($keys as $index => $key) {
-                $field = get_field_object($key);
-                if (!$field) { // no ACF field
-                    continue;
+            /**
+             * Post ID needed for get_post_meta if nested ACF
+             */
+            global $post;
+
+
+            /**
+             * Used for Debuging - Shows all Keys
+             */
+
+
+//            echo '<div class="field" style="margin: 50px 0; width: 80%; margin-left: 20%;">';
+//            echo "<h2>Passed PLL Keys</h2>";
+//
+//            foreach($keys as $index => $item) {
+//
+//                $fieldToSync = false;
+//
+//                $acfSystemField = get_post_meta( $post->ID, "_".$item, true);
+//
+//                if(get_field_object($acfSystemField)) {
+//                    echo "<span style='color: green;'>".$item."<br></span>";
+//                } else {
+//                    /**
+//                     * Check if this is a nested ACF Field by getting the field ID as a Substring from the System Field
+//                     */
+//                    $acfSystemField = get_post_meta( $post->ID, "_".$item, true);
+//                    $needle = "_field";
+//                    $startPos = strpos($acfSystemField, $needle);
+//                    $fieldId = substr($acfSystemField , $startPos + 1);
+//                    if(get_field_object($fieldId)) {
+//                        // Is nested ACF field
+//                        echo "<span style='color: green;'>".$item."<br></span>";
+//                    } else {
+//                        /**
+//                         * Check if this is a ACF System Field by getting the field ID
+//                         */
+//                        $acfSystemField = get_post_meta( $post->ID, "_".$item, true);
+//                        if(get_field_object($acfSystemField)) {
+//                            // Is nested ACF field
+//                            echo "<span style='color: green;'>".$item."<br></span>";
+//                        } else {
+//
+//                            // Not an ACF Field
+//                            echo "<span style='color: red;'>" . $item . "<br></span>";
+//                        }
+//                    }
+//                }
+//
+//                if (!$fieldToSync) {
+//                    unset($keys[$index]);
+//                }
+//            }
+//
+//            echo '</div>';
+
+
+
+
+
+            foreach($keys as $index => $item) {
+
+                $fieldToSync = false;
+
+                $acfSystemField = get_post_meta( $post->ID, "_".$item, true);
+
+                if(get_field_object($acfSystemField)) {
+                    if(get_field_object($acfSystemField)["lang_sync"]) {
+                        $fieldToSync = true;
+                    }
+                } else {
+                    /**
+                     * Check if this is a nested ACF Field by getting the field ID as a Substring from the System Field
+                     */
+                    $acfSystemField = get_post_meta( $post->ID, "_".$item, true);
+                    $needle = "_field";
+                    $startPos = strpos($acfSystemField, $needle);
+                    $fieldId = substr($acfSystemField , $startPos + 1);
+                    if(get_field_object($fieldId)) {
+                        // Is nested ACF field
+                        if(get_field_object($fieldId)["lang_sync"]) {
+                            $fieldToSync = true;
+                        }
+                    } else {
+                        // Not an ACF Field
+                        continue;
+                    }
                 }
 
-                // safeguard: on bulk editing, lang_sync is not set - so assume 0 to not mess up things
-                // see https://github.com/Mestrona/polylang-acf-sync-some-fields/issues/1
-	            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 0;
-	            if (!$sync) {
+                if (!$fieldToSync) {
                     unset($keys[$index]);
                 }
             }
 
             return $keys;
+
         }
 
         /**

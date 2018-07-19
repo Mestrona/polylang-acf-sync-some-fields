@@ -3,9 +3,15 @@ th.column-polylang_cloner_actions, td.column-polylang_cloner_actions {
 	width: 10em;
 }
 
-.syncedLabel {
-	margin: 0 0 10px;
-	color: #88CE5E;
+.langSyncIcon {
+	background-image: url("../img/auto-sync.svg");
+	background-size: contain;
+	background-repeat: no-repeat;
+	width: 113px;
+	height: 19px;
+	background-position: center;
+	display: inline-block;
+	margin: 0 0 15px;
 }
 
 .postbox-container {
